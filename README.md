@@ -21,20 +21,20 @@ system from the ground up. When we're finished, you should be able to understand
 all of the processes that are necessary in order to process forms in an
 application properly and securely.
 
-**Note:** For the next few labs, we're not going to use mass assignment, we'll assign each
-attribute individually. For example, instead of
-`Student.create(params[:students]) we'll write Student.create(first_name: params[:first_name], last_name: params[:last_name])` and name our fields in the
-view files without the "student" preface. We'll discuss why in the upcoming
-reading on Strong Params.
+**Note:** For the next few labs, we're not going to use mass assignment, we'll
+assign each attribute individually. For example, instead of
+`Student.create(params[:students]) we'll write Student.create(first_name: params[:first_name], last_name: params[:last_name])`
+and name our fields in the view files without the "student" preface. We'll
+discuss why in the upcoming reading on Strong Params.
 
 ## Rendering the Form View
 
 Today we'll be giving the user the ability to create a new post in our BlogFlash
 application. Let's first create a Capybara spec to ensure that going to
-`posts/new` takes us to our form. If you think back to the
-[Rails URL Helpers lesson][helpers], we know that we don't need to hard-code the
-route into our tests any longer. Let's use the standard RESTful convention of
-`new_post_path` for the route helper name:
+`posts/new` takes us to our form. If you think back to the [Rails URL Helpers
+lesson][helpers], we know that we don't need to hard-code the route into our
+tests any longer. Let's use the standard RESTful convention of `new_post_path`
+for the route helper name:
 
 ```ruby
 # spec/features/post_spec.rb
@@ -49,14 +49,16 @@ describe 'new post' do
 end
 ```
 
-As expected, this results in a failure saying that we don't have a `new_post_path` method, so let's create that in our `routes.rb` file:
+As expected, this results in a failure saying that we don't have a
+`new_post_path` method, so let's create that in our `routes.rb` file:
 
 ```ruby
 resources :posts, only: [:index, :new]
 ```
 
-Now it gives this failure: `The action 'new' could not be found for PostsController`. To correct this, let's add a `new` action in
-`PostsController`:
+Now it gives this failure:
+`The action 'new' could not be found for PostsController`. To correct this,
+let's add a `new` action in `PostsController`:
 
 ```ruby
 def new
@@ -198,9 +200,10 @@ If you run `rake routes`, you'll see we now have a `posts#create` action:
 new_post GET  /posts/new(.:format) posts#new
 ```
 
-Running the spec tests again leads to an 'unknown action' error: `The action 'create' could not be found for PostsController`. Let's add a `create` action in
-`PostsController` and have it create a new `Post` object with the values from
-`params` and then redirect to the index page:
+Running the spec tests again leads to an 'unknown action' error:
+`The action 'create' could not be found for PostsController`. Let's add a
+`create` action in `PostsController` and have it create a new `Post` object with
+the values from `params` and then redirect to the index page:
 
 ```ruby
 def create
@@ -217,11 +220,14 @@ error:
 
 Which leads us to a very important part of Rails forms: CSRF.
 
-**Note:** If you are seeing an error along the lines of `Cannot render console from (<IP address here>)! Allowed networks: 127.0.0.1, ::1, 127.0.0.0/127.255.255.255` you'll want to add this code to `config/environments/development.rb`, and not `config/application.rb`, so it is only applied in your development environment.
+**Note:** If you are seeing an error along the lines of
+`Cannot render console from (<IP address here>)! Allowed networks: 127.0.0.1, ::1, 127.0.0.0/127.255.255.255`
+you'll want to add this code to `config/environments/development.rb`, and not
+`config/application.rb`, so it is only applied in your development environment.
 
 ```ruby
 class Application < Rails::Application
-  config.web_console.whitelisted_ips = '<IP address here>'
+  config.web_console.whitelisted_ips = '24.193.17.33'
 end
 ```
 
@@ -231,14 +237,15 @@ end
 explanation of what happens during a CSRF request, let's walk through a
 real-life example of a Cross-Site Request Forgery hack:
 
-1.  You go to your bank website and log in. After checking your balance, you open
-    up a new tab in the browser and go to your favorite meme site.
+1.  You go to your bank website and log in. After checking your balance, you
+    open up a new tab in the browser and go to your favorite meme site.
 
-2.  Unbeknownst to you, the meme site is actually a hacking site that has scripts
-    running in the background as soon as you land on their page.
+2.  Unbeknownst to you, the meme site is actually a hacking site that has
+    scripts running in the background as soon as you land on their page.
 
-3.  One of the scripts on the site hijacks the banking session that's open in the
-    other browser tab and submits a form request to transfer money to their account.
+3.  One of the scripts on the site hijacks the banking session that's open in
+    the other browser tab and submits a form request to transfer money to their
+    account.
 
 4.  The banking form can't tell that the form request wasn't made by you, so it
     goes through the process as if you were the one who made the request.
@@ -309,15 +316,25 @@ If we run the tests again, we'll see that they're all still passing. Let's take
 a look at the HTML generated by our Rails `ActionView` methods:
 
 ```html
-<form action="/posts" accept-charset="UTF-8" method="post"><input name="utf8" type="hidden" value="&#x2713;" /><input type="hidden" name="authenticity_token" value="zkOjrjTG8Lxn0CF8Lt/kFIgWdYyY3NTMbwh+Q9kPX1NrYztgq0GZNCjLFavBXka1Y5QhNjDlhX+dzQoZMzUjOA==" />
-  <label>Post title:</label><br>
-  <input type="text" id="post_title" name="post[title]"><br>
+<form action="/posts" accept-charset="UTF-8" method="post">
+  <input name="utf8" type="hidden" value="&#x2713;" /><input
+    type="hidden"
+    name="authenticity_token"
+    value="zkOjrjTG8Lxn0CF8Lt/kFIgWdYyY3NTMbwh+Q9kPX1NrYztgq0GZNCjLFavBXka1Y5QhNjDlhX+dzQoZMzUjOA=="
+  />
+  <label>Post title:</label><br />
+  <input type="text" id="post_title" name="post[title]" /><br />
 
-  <label>Post description:</label><br>
-  <textarea id="post_description" name="post[description]"></textarea><br>
+  <label>Post description:</label><br />
+  <textarea id="post_description" name="post[description]"></textarea><br />
 
-  <input type="hidden" name="authenticity_token" id="authenticity_token" value="7SuubeJGbqfm4rO+F5VTS6Wl1SNCTGOr/mrYZKOQLbtICzajfcEHL6n5h2n4FPHqTieBmep1MhgMr6w+SapR0A==" />
-  <input type="submit" value="Submit Post">
+  <input
+    type="hidden"
+    name="authenticity_token"
+    id="authenticity_token"
+    value="7SuubeJGbqfm4rO+F5VTS6Wl1SNCTGOr/mrYZKOQLbtICzajfcEHL6n5h2n4FPHqTieBmep1MhgMr6w+SapR0A=="
+  />
+  <input type="submit" value="Submit Post" />
 </form>
 ```
 
@@ -351,13 +368,17 @@ the form fields, we'll also replace the HTML tag for the submit button with a
 Let's check out the raw HTML all these helper methods generate for us:
 
 ```html
-<form action="/posts" accept-charset="UTF-8" method="post"><input name="utf8" type="hidden" value="&#x2713;" /><input type="hidden" name="authenticity_token" value="vq9SMVNk0CjwgZmYomFRhwbo5dfu7tI/2FiR7jOtlVgbj8r/zOO5oL+arU9N4PMm7WqxbUbXg4wqneW02ZfpMw==" />
-  <label>Post title:</label><br>
-  <input type="text" name="post[title]" id="post_title" /><br>
+<form action="/posts" accept-charset="UTF-8" method="post">
+  <input name="utf8" type="hidden" value="&#x2713;" /><input
+    type="hidden"
+    name="authenticity_token"
+    value="vq9SMVNk0CjwgZmYomFRhwbo5dfu7tI/2FiR7jOtlVgbj8r/zOO5oL+arU9N4PMm7WqxbUbXg4wqneW02ZfpMw=="
+  />
+  <label>Post title:</label><br />
+  <input type="text" name="post[title]" id="post_title" /><br />
 
-  <label>Post description:</label><br>
-  <textarea name="post[description]" id="post_description">
-</textarea><br>
+  <label>Post description:</label><br />
+  <textarea name="post[description]" id="post_description"></textarea><br />
 
   <input type="submit" name="commit" value="Submit Post" />
 </form>
